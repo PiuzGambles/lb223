@@ -1,0 +1,124 @@
+.glow {
+  box-shadow: 0 0 10px 4px rgba(0, 183, 255, 0.6);
+  border-radius: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glow:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px 8px rgba(0, 183, 255, 0.9);
+}
+
+/* Top 3 avatars layout */
+.topThreeContainer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.topPlayer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.topPlayer img {
+  width: 100px;
+  height: 100px;
+  border-radius: 1rem;
+  object-fit: cover;
+}
+
+.top1 {
+  transform: translateY(-20px);
+}
+
+.top2 {
+  transform: translateY(0);
+}
+
+.top3 {
+  transform: translateY(0);
+}
+
+/* Table styling */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.table th, .table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  color: #fff;
+}
+
+.table th {
+  background-color: rgba(0, 0, 255, 0.2);
+  font-weight: bold;
+}
+
+.table tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Button styles */
+.toggleButton {
+  padding: 0.5rem 1rem;
+  margin: 1rem auto;
+  display: block;
+  background: #007aff;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.toggleButton:hover {
+  transform: scale(1.05);
+  background: #339cff;
+}
+
+/* Countdown */
+.countdown {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  color: #00b7ff;
+}
+
+/* Background sparks */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(ellipse at center, #020024 0%, #090979 50%, #000000 100%);
+  overflow-x: hidden;
+}
+
+@keyframes sparks {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-100vh) scale(0.2);
+    opacity: 0;
+  }
+}
+
+.spark {
+  position: fixed;
+  bottom: 0;
+  width: 3px;
+  height: 20px;
+  background: #00b7ff;
+  opacity: 0.6;
+  animation: sparks 6s linear infinite;
+}
