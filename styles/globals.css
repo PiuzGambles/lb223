@@ -1,0 +1,123 @@
+body, html, #__next {
+  height: 100%;
+  margin: 0;
+  background: #001f3f;
+  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.container {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 10px;
+  background: rgba(0, 30, 63, 0.75);
+  border-radius: 10px;
+  box-shadow: 0 0 20px #0066ff88;
+}
+
+/* Анімований фон іскор */
+@keyframes sparks {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+}
+
+/* Твої іскри — це псевдоелементи body */
+body::before, body::after {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle, #3399ff 2px, transparent 3px),
+    radial-gradient(circle, #66ccff 1.5px, transparent 2.5px);
+  background-repeat: repeat;
+  background-position: 0 0, 50px 50px;
+  background-size: 100px 100px;
+  animation: sparks 7s linear infinite;
+  opacity: 0.15;
+  z-index: -1;
+}
+
+body::after {
+  animation-delay: 3.5s;
+}
+
+/* Заголовки */
+h1, h2 {
+  text-align: center;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+}
+
+/* Таблиці */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 40px;
+}
+
+thead {
+  background: #004080;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #003366;
+}
+
+tr:hover {
+  background: #003366aa;
+  transition: background-color 0.3s ease;
+}
+
+/* Автари */
+.avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: 10px;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+/* Glow ефект для топ 3 */
+.avatar-glow {
+  border-color: #00aaff;
+  box-shadow: 0 0 8px 2px #00aaff;
+}
+
+/* Нікнейми з glow для топ 3 */
+.glow {
+  color: #00aaff;
+  font-weight: bold;
+  text-shadow: 0 0 8px #00aaff;
+  transition: transform 0.2s ease;
+}
+
+/* Кнопки (якщо будуть) */
+button {
+  background: transparent;
+  border: 2px solid #00aaff;
+  padding: 8px 16px;
+  color: #00aaff;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 5px;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+button:hover {
+  box-shadow: 0 0 10px #00aaff;
+  transform: scale(1.05);
+}
