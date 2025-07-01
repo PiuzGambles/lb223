@@ -1,102 +1,103 @@
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Зберігаємо кеш для Steam user data, щоб не робити зайвих запитів
-  const steamCache = {};
+  const [current, setCurrent] = useState([]);
+  const [previous, setPrevious] = useState([]);
 
   useEffect(() => {
-    async function fetchLeaderboard() {
-      setLoading(true);
+    const fetchData = async () => {
       try {
         const res = await fetch("/api/leaderboard");
-        if (!res.ok) throw new Error("Failed to fetch leaderboard");
         const data = await res.json();
-
-        // Паралельно підтягуємо дані Steam для кожного гравця
-        const detailed = await Promise.all(
-          data.map(async (user) => {
-            if (steamCache[user.steamid]) return steamCache[user.steamid];
-            const steamRes = await fetch(`/api/steam-user?steamid=${user.steamid}`);
-            if (!steamRes.ok) return {...user, personaname: "Unknown", avatarfull: "/default-avatar.png"};
-            const steamData = await steamRes.json();
-            const fullData = {...user, personaname: steamData.personaname, avatarfull: steamData.avatarfull};
-            steamCache[user.steamid] = fullData;
-            return fullData;
-          })
-        );
-
-        setLeaderboard(detailed);
+        if (data && data.success && data.response) {
+          const sorted = data.response.sort((a, b) => b.wagered - a.wagered);
+          setCurrent(sorted);
+        }
+        const prev = JSON.parse(localStorage.getItem("previous_leaderboard")) || [];
+        setPrevious(prev);
       } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+        console.error("Error fetching leaderboard:", err);
       }
-    }
-
-    fetchLeaderboard();
+    };
+    fetchData();
   }, []);
 
+  useEffect(() => {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMonday = day === 0 ? 6 : day - 1;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - diffToMonday);
+    monday.setHours(0, 0, 0, 0);
+    const lastReset = localStorage.getItem("last_reset");
+    if (!lastReset || new Date(lastReset).getTime() < monday.getTime()) {
+      localStorage.setItem("previous_leaderboard", JSON.stringify(current));
+      localStorage.setItem("last_reset", monday.toISOString());
+    }
+  }, [current]);
+
+  const renderLeaderboard = (players) => (
+    <>
+      <div className="flex justify-center gap-8 mb-10">
+        {players.slice(0, 3).map((player, i) => (
+          <div key={i} className={`text-center ${i === 0 ? "scale-110" : ""}`}>
+            <img
+              src={player.avatar}
+              alt="avatar"
+              className="w-24 h-24 mx-auto rounded-full border-4 shadow-lg"
+              style={{
+                borderColor: ["#FFD700", "#C0C0C0", "#CD7F32"][i],
+                boxShadow: `0 0 20px 5px ${["#FFD700", "#C0C0C0", "#CD7F32"][i]}`,
+              }}
+            />
+            <p className="text-white mt-2">{player.nickname}</p>
+            <p className="text-blue-300">{player.wagered} wagered</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="overflow-x-auto max-w-3xl mx-auto">
+        <table className="w-full text-white">
+          <thead>
+            <tr>
+              <th className="border-b border-gray-600 p-2 text-left">#</th>
+              <th className="border-b border-gray-600 p-2 text-left">Player</th>
+              <th className="border-b border-gray-600 p-2 text-left">Wagered</th>
+            </tr>
+          </thead>
+          <tbody>
+            {players.slice(3).map((player, index) => (
+              <tr key={index} className="hover:bg-blue-900/20">
+                <td className="p-2">{index + 4}</td>
+                <td className="p-2 flex items-center gap-2">
+                  <img src={player.avatar} className="w-8 h-8 rounded-full" alt="avatar" />
+                  {player.nickname}
+                </td>
+                <td className="p-2">{player.wagered}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+
   return (
-    <div style={styles.page}>
-      <h1 style={{color:"#0ff", textShadow:"0 0 8px #0ff"}}>Weekly Leaderboard</h1>
-      {loading ? (
-        <p style={{color:"#0cc"}}>Loading...</p>
-      ) : (
-        <ol style={styles.list}>
-          {leaderboard.map((user, i) => (
-            <li key={user.steamid} style={styles.item}>
-              <img
-                src={user.avatarfull || "/default-avatar.png"}
-                alt={user.personaname || "User avatar"}
-                style={styles.avatar}
-              />
-              <div>
-                <div style={{fontWeight:"bold", color:"#0ff", textShadow:"0 0 5px #0ff"}}>
-                  #{i + 1} {user.personaname || "Unknown"}
-                </div>
-                <div style={{color:"#0cc"}}>Wagered: {user.wagered / 100} coins</div>
-              </div>
-            </li>
-          ))}
-        </ol>
-      )}
+    <div className="min-h-screen bg-black text-white px-4 py-8 relative overflow-hidden">
+      {/* Background spark animation */}
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black to-blue-900 animate-pulse opacity-40 pointer-events-none" />
+
+      <h1 className="text-3xl font-bold text-center text-blue-200 mb-4">Weekly Leaderboard</h1>
+
+      <section className="mb-12">
+        <h2 className="text-xl text-blue-400 mb-4 text-center">Current Week</h2>
+        {renderLeaderboard(current)}
+      </section>
+
+      <section>
+        <h2 className="text-xl text-blue-400 mb-4 text-center">Previous Week</h2>
+        {renderLeaderboard(previous)}
+      </section>
     </div>
   );
 }
-
-const styles = {
-  page: {
-    background: "radial-gradient(circle, #001f33, #000814)",
-    minHeight: "100vh",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    padding: 20,
-    textAlign: "center",
-  },
-  list: {
-    listStyle: "none",
-    padding: 0,
-    margin: "20px auto",
-    maxWidth: 600,
-  },
-  item: {
-    display: "flex",
-    alignItems: "center",
-    backgroundColor: "#002f4b",
-    borderRadius: 8,
-    padding: "10px 20px",
-    marginBottom: 12,
-    boxShadow: "0 0 10px #00ffff44",
-    transition: "transform 0.2s, box-shadow 0.2s",
-    cursor: "pointer",
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: "50%",
-    marginRight: 15,
-    boxShadow: "0 0 8px #0ff",
-  },
-};
